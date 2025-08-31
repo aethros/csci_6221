@@ -3,10 +3,10 @@
 open System.Text.Json
 
 module Say =
-    let hello name =
+    let hello (name: string): unit =
         printfn "Hello %s" name
 
 module Json =
-    let getJson value =
-        let json = JsonSerializer.Serialize(value)
+    let getJson<'T> (value: 'T): 'T * string =
+        let json: string = JsonSerializer.Serialize value
         value, json
