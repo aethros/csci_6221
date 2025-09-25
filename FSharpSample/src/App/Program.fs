@@ -1,35 +1,43 @@
 ﻿// For more information see https://aka.ms/fsharp-console-apps
-
-open System
-open Library.Json
-open Library.Say
-
-// `type` typename = {| membername: type; |}
-type serialized = {| args: array<string>; year: int |}
-
-// Impure function
-let output (arg: string, value: serialized, json: string) : unit =
-    hello arg
-    printfn "Hello from F#"
-    printfn "Nice command-line arguments! Here's what System.Text.Json has to say about them:"
-    printfn $"Input: %0A{value}"
-    printfn $"Output: %s{json}"
+open NetLib.Network
+open SharpPcap.LibPcap
+open System.IO
+open Types.Network
 
 [<EntryPoint>]
 // let funcname (args: type): returnType = /* body */
 let main (args: array<string>) : int =
-    if args.Length < 3 then
+    if args.Length < 1 then
+        printf "No capture count specified."
         -1
     else
-        // let var: type = value
-        let arg: string = args[1]
-        let args: array<string> = args[2..]
+        printfn "Getting Network Devices ..."
 
-        let (value: serialized), (json: string) =
-            getJson
-                {| args = args
-                   year = DateTime.Now.Year |}
+        let devices: list<NetworkDevice> = getNetworkDevices LibPcapLiveDeviceList.Instance
+        let captureCount: int = int args[0]
+        devices
+        |> List.iteri (fun (i: int) (device: NetworkDevice) -> printfn "%d. %s - %s" i device.Name device.Description)
 
-        output (arg, value, json) // Side effects
+        if not devices.IsEmpty then
+            printf "Select device (0-%d): " (devices.Length - 1)
 
-        0 // return an integer exit code
+            let deviceIndex = System.Console.ReadLine() |> int
+            let packets: list<PacketInfo> =
+                capturePackets (devices.Item(deviceIndex).Name, captureCount)
+
+            printfn "Capturing Packets ..."
+            if not packets.IsEmpty then
+                printfn "Exporting traffic..."
+
+                let path = "network_traffic.csv"
+                let csv = convertToCsv packets
+
+                printfn "Exported %d packets to %s" packets.Length path
+                File.WriteAllLines(path, csv)
+                0
+            else
+                printfn "No packets captured."
+                -1
+        else
+            printfn "No devices found."
+            -1

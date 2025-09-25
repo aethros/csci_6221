@@ -56,3 +56,4 @@ nunit-*.xml
 .fake
 .DS_Store
 .devcontainer
+.config
