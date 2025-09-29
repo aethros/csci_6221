@@ -4,7 +4,6 @@
 open SharpPcap.LibPcap
 open System.IO
 open NetLib.Network
-open Types.Network
 open App.AppUtil
 
 module Program =
@@ -12,24 +11,24 @@ module Program =
     [<EntryPoint>]
     // let funcname (args: type): returnType = /* body */
     let main (args: array<string>) : int =
-        let elevated =
-            if isWindows() then
-                isAdministrator();
+        let elevated: bool =
+            if isWindows () then
+                isAdministrator ()
             else
-                isElevated();
+                isElevated ()
 
         if args.Length < 1 || not elevated then
-            printfn "Program cannot run without administrative rights and a defined capture count."
+            printfn "Program cannot run without administrative rights, and requires a defined capture count."
             printfn "usage: dotnet run -- <count>"
             -1
         else
-
-            printfn "Getting Network Devices ..."
+            printfn "Getting network devices ..."
 
             let devices: list<NetworkDevice> = getNetworkDevices LibPcapLiveDeviceList.Instance
             let captureCount: int = int args[0]
             devices
-            |> List.iteri (fun (i: int) (device: NetworkDevice) -> printfn "%d. %s - %s" i device.Name device.Description)
+            |> List.iteri (fun (i: int) (device: NetworkDevice) ->
+                printfn "%2d. %4s \t-\t %s" i device.Name device.Description)
 
             if not devices.IsEmpty then
                 printf "Select device (0-%d): " (devices.Length - 1)
@@ -38,9 +37,9 @@ module Program =
                 let packets: list<PacketInfo> =
                     capturePackets (devices.Item(deviceIndex).Name, captureCount)
 
-                printfn "Capturing Packets ..."
+                printfn "Capturing packets ..."
                 if not packets.IsEmpty then
-                    printfn "Exporting traffic..."
+                    printfn "Exporting traffic ..."
 
                     let path = "network_traffic.csv"
                     let csv = convertToCsv packets

@@ -10,16 +10,16 @@ module AppUtil =
 
     let isAdministrator () =
         try
-            let identity = WindowsIdentity.GetCurrent()
-            let principal = WindowsPrincipal identity
-            principal.IsInRole WindowsBuiltInRole.Administrator
-        with
-        | ex ->
-            printfn "An error occurred while checking admin rights: %s" ex.Message
+            (WindowsPrincipal
+                (WindowsIdentity.GetCurrent()))
+                    .IsInRole WindowsBuiltInRole.Administrator
+        with e ->
+            printfn "An error occurred while checking admin rights: %s" e.Message
             false
 
     let isElevated () =
-        geteuid() = 0u
+        geteuid () = 0u
 
     let isWindows () =
-        Environment.OSVersion.Platform.ToString().StartsWith "Win"
+        Environment.OSVersion
+            .Platform.ToString().StartsWith "Win"

@@ -10,11 +10,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CSInterop\CSInterop.csproj" />
-    <ProjectReference Include="..\Types\Types.fsproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="PacketDotNet" Version="1.4.8" />
     <PackageReference Include="SharpPcap" Version="6.3.1" />
   </ItemGroup>
