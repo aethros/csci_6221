@@ -34,7 +34,7 @@ namespace CSInterop
                 throw new ArgumentException("One or more of the supplied arguments were invalid for this operation.");
             }
             int capturedCount = 0;
-            void OnPacketArrival(object _, PacketCapture e)
+            device.OnPacketArrival += (object _, PacketCapture e) => 
             {
                 Console.WriteLine("OnPacketArrival() invoked");
                 if (capturedCount < captures)
@@ -47,8 +47,7 @@ namespace CSInterop
                         Console.WriteLine("List<PacketInfo>.Add() invoked");
                     }
                 }
-            }
-            device.OnPacketArrival += OnPacketArrival;
+            };
             Console.WriteLine("OnPacketArrival() subscribed");
         }
     }

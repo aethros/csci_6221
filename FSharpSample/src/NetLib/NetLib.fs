@@ -1,10 +1,8 @@
 ﻿namespace NetLib
 
-open System.Collections.Generic
 open SharpPcap
 open SharpPcap.LibPcap
 open PacketDotNet
-open CSInterop
 open Types.Network
 
 module Network =
@@ -17,20 +15,34 @@ module Network =
               IsActive = device.Opened })
         |> Seq.toList
 
-    let parsePacketData (rawCapture: PacketCapture) (linkType: LinkLayers) : option<PacketInfo> =
-        let packet: Packet = Packet.ParsePacket(linkType, rawCapture.Data.ToArray())
-        let ipPacket: IPPacket = packet.Extract<IPPacket>()
-        match ipPacket with
-        | null -> None
-        | _ -> Some {
-            Timestamp = rawCapture.Header.Timeval.Date
-            SourceIP = ipPacket.SourceAddress.ToString()
-            DestinationIP = ipPacket.DestinationAddress.ToString()
-            Protocol = ipPacket.Protocol.ToString()
-            Length = rawCapture.Data.Length }
+    let parsePacketData (rawCapture: PacketCapture, linkType: LinkLayers) : option<PacketInfo> =
+        try
+            let packet: Packet = Packet.ParsePacket(linkType, rawCapture.Data.ToArray())
+            let ipPacket: IPPacket = packet.Extract<IPPacket>()
+            match ipPacket with
+            | null -> None
+            | _ -> Some {
+                Timestamp = rawCapture.Header.Timeval.Date
+                SourceIP = ipPacket.SourceAddress.ToString()
+                DestinationIP = ipPacket.DestinationAddress.ToString()
+                Protocol = ipPacket.Protocol.ToString()
+                Length = rawCapture.Data.Length }
+        finally
+            ignore None
+        
 
-    let inline packetInfoCallback (rawCapture: PacketCapture) (linkType: LinkLayers) : System.Nullable<PacketInfo> =
-        parsePacketData rawCapture linkType |> toNullableStruct
+    let rec getPackets (device: LibPcapLiveDevice, count: int) : list<PacketInfo> =
+        if count <= 0 then
+            []
+        else
+            let mutable capture = PacketCapture()
+            let _ = device.GetNextPacket &capture
+            let info = parsePacketData(capture, device.LinkType)
+            match info with
+            | Some value ->
+                value :: getPackets(device, count - 1)
+            | None ->
+                getPackets(device, count - 1)
 
     let capturePackets (deviceName: string, packetCount: int) : list<PacketInfo> =
         let device: LibPcapLiveDevice =
@@ -38,15 +50,8 @@ module Network =
             |> Seq.tryFind (fun d -> d.Name = deviceName)
             |> Option.defaultWith (fun () -> failwith $"Device {deviceName} not found")
         try
-            let packetList = List<PacketInfo>()
-            CSHandler.SubscribeToPacketArrival(
-                device,
-                packetList,
-                packetCount,
-                packetInfoCallback)
-            device.Open(DeviceConfiguration())
-            device.StartCapture()
-            packetList |> Seq.toList
+            device.Open(DeviceModes.Promiscuous, 1000)
+            getPackets(device, packetCount) |> Seq.toList
         finally
             device.StopCapture()
             device.Close()
@@ -64,3 +69,6 @@ module Network =
                     p.Protocol
                     p.Length)
         header :: csvLines
+
+    let inline packetInfoCallback (rawCapture: PacketCapture) (linkType: LinkLayers) : System.Nullable<PacketInfo> =
+        parsePacketData(rawCapture, linkType) |> toNullableStruct
