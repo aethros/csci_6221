@@ -37,7 +37,6 @@ module Program =
                 let packets: list<PacketInfo> =
                     capturePackets (devices.Item(deviceIndex).Name, captureCount)
 
-                printfn "Capturing packets ..."
                 if not packets.IsEmpty then
                     printfn "Exporting traffic ..."
 

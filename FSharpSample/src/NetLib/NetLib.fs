@@ -50,15 +50,18 @@ module Network =
         | :? IndexOutOfRangeException -> None
         | _ -> None
 
-    let rec getNPackets (device: LibPcapLiveDevice, count: int) : list<PacketInfo> =
-        if count <= 0 then []
-        else
-            let mutable capture = PacketCapture()
-            let _ = device.GetNextPacket &capture
-            let info: option<PacketInfo> = parsePacketData (capture, device.LinkType)
-            match info with
-            | Some value -> value :: getNPackets (device, count - 1)
-            | None -> getNPackets (device, count)
+    let getNPackets (device: LibPcapLiveDevice, count: int) : list<PacketInfo> =
+        let rec loop acc remaining =
+            if remaining <= 0 then List.rev acc
+            else
+                let mutable capture = PacketCapture()
+                let _ = device.GetNextPacket &capture
+                match parsePacketData (capture, device.LinkType) with
+                | Some packet ->
+                    printfn "Packet %d captured ..." acc.Length
+                    loop (packet :: acc) (remaining - 1)
+                | None -> loop acc remaining
+        loop [] count
 
     let capturePackets (deviceName: string, packetCount: int) : list<PacketInfo> =
         let device: LibPcapLiveDevice =
