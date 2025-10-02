@@ -22,34 +22,33 @@ module Program =
             printfn "usage: dotnet run -- <count>"
             -1
         else
-            printfn "Getting network devices ..."
+        printfn "Getting network devices ..."
 
-            let devices: list<NetworkDevice> = getNetworkDevices LibPcapLiveDeviceList.Instance
-            let captureCount: int = int args[0]
-            devices
-            |> List.iteri (fun (i: int) (device: NetworkDevice) ->
-                printfn "%2d. %4s \t-\t %s" i device.Name device.Description)
+        let devices: list<NetworkDevice> = getNetworkDevices LibPcapLiveDeviceList.Instance
+        let captureCount: int = int args[0]
+        devices
+        |> List.iteri (fun (i: int) (device: NetworkDevice) ->
+            printfn "%2d. %4s \t-\t %s" i device.Name device.Description)
 
-            if not devices.IsEmpty then
-                printf "Select device (0-%d): " (devices.Length - 1)
+        if devices.IsEmpty then
+            printfn "No devices found."
+            -1
+        else 
+        printf "Select device (0-%d): " (devices.Length - 1)
 
-                let deviceIndex = System.Console.ReadLine() |> int
-                let packets: list<PacketInfo> =
-                    capturePackets (devices.Item(deviceIndex).Name, captureCount)
+        let deviceIndex = System.Console.ReadLine() |> int
+        let packets: list<PacketInfo> =
+            capturePackets (devices.Item(deviceIndex).Name, captureCount)
 
-                printfn "Capturing packets ..."
-                if not packets.IsEmpty then
-                    printfn "Exporting traffic ..."
+        if packets.IsEmpty then
+            printfn "No packets captured."
+            -1
+        else
+        printfn "\nExporting traffic ..."
 
-                    let path = "network_traffic.csv"
-                    let csv = convertToCsv packets
-
-                    printfn "Exported %d packets to %s" packets.Length path
-                    File.WriteAllLines(path, csv)
-                    0
-                else
-                    printfn "No packets captured."
-                    -1
-            else
-                printfn "No devices found."
-                -1
+        let path = "network_traffic.csv"
+        let csv = convertToCsv packets
+        
+        printfn "Exported %d packets to %s" packets.Length path
+        File.WriteAllLines(path, csv)
+        0
