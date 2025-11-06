@@ -1,10 +1,13 @@
 ﻿namespace App
 
 // For more information see https://aka.ms/fsharp-console-apps
-open SharpPcap.LibPcap
 open System.IO
-open NetLib.Network
+
+open Plotly.NET
+open SharpPcap.LibPcap
+
 open App.AppUtil
+open NetLib.Network
 
 module Program =
 
@@ -45,6 +48,15 @@ module Program =
             -1
         else
         printfn "\nExporting traffic ..."
+        plotPacketData
+            (packets |> List.toArray,
+            (fun p -> packets |> List.filter (fun x -> x.DestinationIP = p.DestinationIP) |> List.length),
+            (fun p -> p.DestinationIP),
+            (fun x y -> Chart.Column(x, y)
+                        |> Chart.withTitle "Network Traffic by Destination IP"
+                        |> Chart.withXAxisStyle "Destination IP"
+                        |> Chart.withYAxisStyle "Number of Packets"),
+            "network_traffic.html")
 
         let path = "network_traffic.csv"
         let csv = convertToCsv packets

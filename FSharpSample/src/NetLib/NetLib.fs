@@ -1,9 +1,10 @@
 ﻿namespace NetLib
 
 open System
+
+open PacketDotNet
 open SharpPcap
 open SharpPcap.LibPcap
-open PacketDotNet
 
 module Network =
 

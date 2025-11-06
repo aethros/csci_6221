@@ -1,8 +1,13 @@
 namespace App
 
 open System
-open System.Security.Principal
+open System.IO
 open System.Runtime.InteropServices
+open System.Security.Principal
+
+open Plotly.NET
+
+open NetLib.Network
 
 module AppUtil =
     [<DllImport("libc", EntryPoint = "geteuid")>]
@@ -23,3 +28,43 @@ module AppUtil =
     let isWindows () =
         Environment.OSVersion
             .Platform.ToString().StartsWith "Win"
+
+    let loadFromCsv(path: string) : PacketInfo array =
+        let lines = File.ReadAllLines path
+        lines
+        |> Array.skip 1 // Skip header
+        |> Array.map (fun line ->
+            let parts = line.Split ','
+            {
+                Timestamp = DateTime.Parse parts.[0]
+                SourceIP = parts.[1]
+                DestinationIP = parts.[2]
+                Protocol = parts.[3]
+                DestinationPort = uint16 parts.[4]
+                Length = int parts.[5]
+            })
+
+    let plotPacketData<'T1, 'T2>
+        (packets: PacketInfo array,
+        xTransform: PacketInfo -> 'T1,
+        yTransform: PacketInfo -> 'T2,
+        configureChart: seq<'T1> -> seq<'T2> -> GenericChart,
+        filePath: string)
+        : unit =
+            let xValues = packets |> Array.map xTransform
+            let yValues = packets |> Array.map yTransform
+            let chart = configureChart xValues yValues
+            chart |> Chart.saveHtml filePath
+
+    let plotCsvData<'T1, 'T2>
+        (path: string,
+        xTransform: PacketInfo -> 'T1,
+        yTransform: PacketInfo -> 'T2,
+        configureChart: seq<'T1> -> seq<'T2> -> GenericChart,
+        filePath: string)
+        : unit =
+            let packets = loadFromCsv path
+            let xValues = packets |> Array.map xTransform
+            let yValues = packets |> Array.map yTransform
+            let chart = configureChart xValues yValues
+            chart |> Chart.saveHtml filePath
