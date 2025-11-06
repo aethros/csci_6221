@@ -9,6 +9,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "NetLib", "src\NetLib\NetLib
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "App", "src\App\App.fsproj", "{6C0833C3-7F40-4D42-A0B8-2025CF02923F}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Parser", "src\Parser\Parser.fsproj", "{DC888969-B21C-46E6-A81B-757956423DA8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,18 @@ Global
 		{6C0833C3-7F40-4D42-A0B8-2025CF02923F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C0833C3-7F40-4D42-A0B8-2025CF02923F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C0833C3-7F40-4D42-A0B8-2025CF02923F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC888969-B21C-46E6-A81B-757956423DA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC888969-B21C-46E6-A81B-757956423DA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC888969-B21C-46E6-A81B-757956423DA8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{DC888969-B21C-46E6-A81B-757956423DA8}.Debug|x64.Build.0 = Debug|Any CPU
+		{DC888969-B21C-46E6-A81B-757956423DA8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DC888969-B21C-46E6-A81B-757956423DA8}.Debug|x86.Build.0 = Debug|Any CPU
+		{DC888969-B21C-46E6-A81B-757956423DA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC888969-B21C-46E6-A81B-757956423DA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC888969-B21C-46E6-A81B-757956423DA8}.Release|x64.ActiveCfg = Release|Any CPU
+		{DC888969-B21C-46E6-A81B-757956423DA8}.Release|x64.Build.0 = Release|Any CPU
+		{DC888969-B21C-46E6-A81B-757956423DA8}.Release|x86.ActiveCfg = Release|Any CPU
+		{DC888969-B21C-46E6-A81B-757956423DA8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -34,5 +48,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{F7E972DB-7BFD-4CDC-A0FA-5F3372BC2AB4} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{6C0833C3-7F40-4D42-A0B8-2025CF02923F} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{DC888969-B21C-46E6-A81B-757956423DA8} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

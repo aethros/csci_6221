@@ -29,7 +29,9 @@ module AppUtil =
         Environment.OSVersion
             .Platform.ToString().StartsWith "Win"
 
-    let loadFromCsv(path: string) : PacketInfo array =
+    let loadFromCsv(path: string) : array<PacketInfo> =
+        printfn "Loading data from CSV: %s" path
+
         let lines = File.ReadAllLines path
         lines
         |> Array.skip 1 // Skip header
@@ -45,26 +47,27 @@ module AppUtil =
             })
 
     let plotPacketData<'T1, 'T2>
-        (packets: PacketInfo array,
+        (packets: array<PacketInfo>,
         xTransform: PacketInfo -> 'T1,
         yTransform: PacketInfo -> 'T2,
-        configureChart: seq<'T1> -> seq<'T2> -> GenericChart,
+        configureChart: seq<'T1> * seq<'T2> -> GenericChart,
         filePath: string)
         : unit =
             let xValues = packets |> Array.map xTransform
             let yValues = packets |> Array.map yTransform
-            let chart = configureChart xValues yValues
+            let chart = configureChart(xValues, yValues)
             chart |> Chart.saveHtml filePath
 
     let plotCsvData<'T1, 'T2>
         (path: string,
         xTransform: PacketInfo -> 'T1,
         yTransform: PacketInfo -> 'T2,
-        configureChart: seq<'T1> -> seq<'T2> -> GenericChart,
+        configureChart: seq<'T1> * seq<'T2> -> GenericChart,
         filePath: string)
         : unit =
             let packets = loadFromCsv path
-            let xValues = packets |> Array.map xTransform
-            let yValues = packets |> Array.map yTransform
-            let chart = configureChart xValues yValues
-            chart |> Chart.saveHtml filePath
+            plotPacketData(packets,
+                xTransform,
+                yTransform, 
+                configureChart,
+                filePath)

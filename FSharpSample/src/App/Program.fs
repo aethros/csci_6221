@@ -48,11 +48,17 @@ module Program =
             -1
         else
         printfn "\nExporting traffic ..."
-        plotPacketData
-            (packets |> List.toArray,
-            (fun p -> packets |> List.filter (fun x -> x.DestinationIP = p.DestinationIP) |> List.length),
+        // Precompute counts per destination IP for efficiency
+        let destIpCounts =
+            packets
+            |> Seq.groupBy (fun p -> p.DestinationIP)
+            |> Seq.map (fun (ip, ps) -> ip, Seq.length ps)
+            |> Map.ofSeq
+
+        plotPacketData(packets |> List.toArray,
+            (fun p -> destIpCounts.TryFind p.DestinationIP |> Option.defaultValue 0),
             (fun p -> p.DestinationIP),
-            (fun x y -> Chart.Column(x, y)
+            (fun (x, y) -> Chart.Column(x, y)
                         |> Chart.withTitle "Network Traffic by Destination IP"
                         |> Chart.withXAxisStyle "Destination IP"
                         |> Chart.withYAxisStyle "Number of Packets"),
