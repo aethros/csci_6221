@@ -1,2 +1,3 @@
-# csci_6221
-csci_6221
+# f# packet capture tool
+
+simple pcap tool to used explore f# language
